@@ -22,8 +22,8 @@ namespace ShiftSearch
             ChromePath = chromePath;
         }
 
+        public string Url { get; }
         protected string ChromePath { get; }
-        protected string Url { get; }
         protected Browser? Browser { get; private set; }
 
         private async Task<string> GetCallAmountString()

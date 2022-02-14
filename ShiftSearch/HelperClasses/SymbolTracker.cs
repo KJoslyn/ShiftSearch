@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -31,7 +31,7 @@ namespace ShiftSearch
             var success = await ShiftSearchClient.GoToPage();
             if (!success)
             {
-                // TODO Log
+                Log.Warning($"Couldn't navigate to page {ShiftSearchClient.Url} ");
                 // TODO Exponential back off?
                 return;
             }
