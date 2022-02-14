@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using Serilog;
 
 namespace ShiftSearch.Code
 {
@@ -11,24 +12,32 @@ namespace ShiftSearch.Code
     {
         public static double ParseOptionAmount(this string s)
         {
-            double value = double.Parse(
-                s.Substring(0, s.Length - 1), 
-                NumberStyles.AllowCurrencySymbol | NumberStyles.AllowDecimalPoint );
-
-            char lastChar = s[^1];
-
-            if (lastChar == 'K')
+            try
             {
-                return value * 1000;
-            }
+                double value = double.Parse(
+                    s.Substring(0, s.Length - 1),
+                    NumberStyles.AllowCurrencySymbol | NumberStyles.AllowDecimalPoint);
 
-            if (lastChar == 'M')
+                char lastChar = s[^1];
+
+                if (lastChar == 'K')
+                {
+                    return value * 1000;
+                }
+
+                if (lastChar == 'M')
+                {
+                    return value * 1e6;
+                }
+
+                throw new Exception($"Last character did not match K or M");
+            }
+            catch (Exception ex)
             {
-                return value * 1e6;
-            }
+                Log.Debug($"{nameof(ParseOptionAmount)} failed to parse string {s}. Exception message: {ex.Message}");
 
-            // TODO Throw
-            return -1;
+                return 0;
+            }
         }
     }
 }
