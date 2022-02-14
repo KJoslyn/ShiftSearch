@@ -49,20 +49,20 @@ namespace ShiftSearch
 
             while (!stoppingToken.IsCancellationRequested)
             {
-                //TimeSpan now = DateTime.Now.TimeOfDay;
-                //if (now >= marketCloseTime)
-                //{
-                //    Log.Information("Market now closed!");
-                //    break;
-                //}
-                //else if (now <= marketOpenTime)
-                //{
-                //    Log.Information("Market not open yet!");
-                //    // Or, wait until 9:30am
-                //    await Task.Delay(30 * 1000, stoppingToken);
+                TimeSpan now = DateTime.Now.TimeOfDay;
+                if (now >= marketCloseTime)
+                {
+                    Log.Information("Market now closed!");
+                    break;
+                }
+                else if (now <= marketOpenTime)
+                {
+                    Log.Information("Market not open yet!");
+                    // Or, wait until 9:30am
+                    await Task.Delay(30 * 1000, stoppingToken);
 
-                //    continue;
-                //}
+                    continue;
+                }
 
                 foreach (var symbolTracker in _symbolTrackers)
                 {
