@@ -21,9 +21,9 @@ namespace ShiftSearch
             }
             catch (Exception ex)
             {
-                EventLog.WriteEntry("ShiftSearch Application", ex.ToString(), EventLogEntryType.Error);
                 // TODO: This will actually catch any error thrown in the worker. Need to read about services and how they work.
-                Log.Fatal(ex, "The application failed to start correctly."); // This message is misleading.
+                EventLog.WriteEntry("ShiftSearch Application", ex.ToString(), EventLogEntryType.Error);
+                Log.Fatal(ex, "The application crashed");
             }
             finally
             {
