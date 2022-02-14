@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -76,21 +76,27 @@ namespace ShiftSearch
 
                 if (amount >= threshold)
                 {
-                    // TODO Notify, only set to true if success
-                    Notify(amountStr);
-                    _thresholdNotifications[threshold] = true;
+                    bool success = Notify(amountStr);
+                    _thresholdNotifications[threshold] = success;
                     break;
                 }
             }
         }
 
-        public void Notify(string amountStr)
+        public bool Notify(string amountStr)
         {
             var msg = $"{_description} at {amountStr} at {DateTime.Now.ToString("hh:mm:ss")}";
             Log.Information(msg);
-            Console.WriteLine(msg);
-            //var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _plivoConfig.ToNumbers, text: msg);
-            //Console.WriteLine(response);
+
+            var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _plivoConfig.ToNumbers, text: msg);
+
+            if (response.StatusCode == 202)
+            {
+                return true;
+            }
+
+            Log.Warning($"Failed to send text notification with msg {msg}. Response: {response}");
+            return false;
         }
     }
 }
