@@ -14,9 +14,6 @@ namespace ShiftSearch
 {
     public class SymbolTracker
     {
-        //public static bool ONLY_LOG = false;
-        public static bool ONLY_LOG = true;
-
         public SymbolTracker(SymbolConfig symbolConfig, PlivoConfig plivoConfig, string chromePath)
         {
             Symbol = symbolConfig.Symbol;
@@ -111,7 +108,7 @@ namespace ShiftSearch
             var msg = $"{_description} at {amountStr} at {DateTime.Now.ToString("hh:mm:ss")}\n\tNotifying {PhoneNumbersList()}";
             Log.Information(msg);
 
-            if (SymbolTracker.ONLY_LOG)
+            if (Program.ONLY_LOG)
             {
                 return true;
             }

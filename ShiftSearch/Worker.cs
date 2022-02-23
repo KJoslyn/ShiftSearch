@@ -49,12 +49,12 @@ namespace ShiftSearch
             while (!stoppingToken.IsCancellationRequested)
             {
                 TimeSpan now = DateTime.Now.TimeOfDay;
-                if (now >= marketCloseTime)
+                if (now >= marketCloseTime && !Program.IGNORE_MARKET_HOURS)
                 {
                     Log.Information("Market now closed!");
                     break;
                 }
-                else if (now <= marketOpenTime)
+                else if (now <= marketOpenTime && !Program.IGNORE_MARKET_HOURS)
                 {
                     Log.Information("Market not open yet!");
                     // Or, wait until 9:30am

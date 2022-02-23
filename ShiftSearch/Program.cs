@@ -10,6 +10,9 @@ namespace ShiftSearch
 {
     public class Program
     {
+        public static bool ONLY_LOG = true;
+        public static bool IGNORE_MARKET_HOURS = true;
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
