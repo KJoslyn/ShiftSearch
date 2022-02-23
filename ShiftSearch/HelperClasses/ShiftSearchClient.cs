@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using ShiftSearch.Code;
 using ShiftSearch.ViewModels;
@@ -39,13 +40,26 @@ namespace ShiftSearch
         private async Task<string> GetContentOfXpathElement(string xPath)
         {
             var page = await GetPage();
+            Thread.Sleep(1000);
 
-            var handle = await GetElement( page, xPath);
+            int attempt = 1;
+            ElementHandle? handle = null;
+            while (handle == null && attempt <= 3)
+            {
+                if (attempt > 1)
+                {
+                    Console.WriteLine( $"Could not find div with xPath {xPath} on page {page.Url}. Trying again: attempt {attempt}");
+                    Thread.Sleep(attempt * 1000);
+                }
+                handle = await GetElement( page, xPath);
+                attempt++;
+            }
 
             if (handle == null)
             {
-                Log.Error( "Could not find call div!");
+                Log.Error( $"Could not find div with xPath {xPath} on page {page.Url}!");
                 // TODO Throw exception
+                return "";
             }
 
             return await page.EvaluateFunctionAsync<string>("e => e.textContent", handle);
@@ -59,6 +73,8 @@ namespace ShiftSearch
 
         public async Task<bool> GoToPage(string url)
         {
+            Console.WriteLine($"Navigating to page {url}");
+
             if (Browser == null)
             {
                 Browser = await StartBrowser();
