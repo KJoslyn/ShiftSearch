@@ -81,23 +81,20 @@ namespace ShiftSearch
             }
 
             Page page = await GetPage();
-            if (page.Url == url)
-            {
-                return true;
-            }
-
             try
             {
-                await page.GoToAsync(url);
                 if (page.Url == url)
                 {
-                    return true;
+                    await page.ReloadAsync();
+                    return page.Url == url;
                 }
 
-                return false;
+                await page.GoToAsync(url);
+                return page.Url == url;
             }
             catch (Exception ex)
             {
+                Log.Error($"Error loading page {url}, {ex}");
                 return false;
             }
         }
