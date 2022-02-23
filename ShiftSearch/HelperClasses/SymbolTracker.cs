@@ -88,14 +88,25 @@ namespace ShiftSearch
             var msg = $"{_description} at {amountStr} at {DateTime.Now.ToString("hh:mm:ss")}";
             Log.Information(msg);
 
-            var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _plivoConfig.ToNumbers, text: msg);
-
-            if (response.StatusCode == 202)
+            try
             {
-                return true;
+
+                var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _plivoConfig.ToNumbers,
+                    text: msg);
+
+                if (response.StatusCode == 202)
+                {
+                    return true;
+                }
+
+                Log.Warning($"Failed to send text notification with msg {msg}. Response: {response}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Exception while notifying: {ex}");
             }
 
-            Log.Warning($"Failed to send text notification with msg {msg}. Response: {response}");
             return false;
         }
     }
