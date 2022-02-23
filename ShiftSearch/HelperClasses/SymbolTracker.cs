@@ -56,9 +56,9 @@ namespace ShiftSearch
                 putTracker.UpdateAndNotify(vm.PutAmount);
             }
 
-            foreach (var callTracker in PutTrackers)
+            foreach (var callTracker in CallTrackers)
             {
-                callTracker.UpdateAndNotify(vm.PutAmount);
+                callTracker.UpdateAndNotify(vm.CallAmount);
             }
         }
     }
@@ -87,6 +87,11 @@ namespace ShiftSearch
 
         public void UpdateAndNotify(string amountStr)
         {
+            if (string.IsNullOrEmpty(amountStr))
+            {
+                return;
+            }
+
             double amount = amountStr.ParseOptionAmount();
 
             foreach (var (threshold, passedAndNotified) in _thresholdNotifications)
