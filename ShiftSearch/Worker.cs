@@ -66,17 +66,16 @@ namespace ShiftSearch
                     continue;
                 }
 
-                foreach (var symbolTracker in _symbolTrackers)
-                {
-                    await symbolTracker.UpdateAndNotify();
-                }
-
                 try
                 {
+                    foreach (var symbolTracker in _symbolTrackers)
+                    {
+                        await symbolTracker.UpdateAndNotify();
+                    }
                 }
                 catch (Exception ex)
                 {
-
+                    Log.Error($"Exception in Worker: {ex}");
                 }
 
                 await Task.Delay(intervalSeconds*1000, stoppingToken);
