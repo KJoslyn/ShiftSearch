@@ -105,7 +105,7 @@ namespace ShiftSearch
 
         public bool Notify(string amountStr)
         {
-            var msg = $"{_description} at {amountStr} at {DateTime.Now.ToString("hh:mm:ss")}";
+            var msg = $"{_description} at {amountStr} at {DateTime.Now.ToString("hh:mm:ss")}\n\tNotifying {PhoneNumbersList()}";
             Log.Information(msg);
 
             try
@@ -119,7 +119,7 @@ namespace ShiftSearch
                     return true;
                 }
 
-                Log.Warning($"Failed to send text notification with msg {msg}. Response: {response}");
+                Log.Warning($"Failed to send text notification to {PhoneNumbersList()} with msg {msg}. Response: {response}");
                 return false;
             }
             catch (Exception ex)
@@ -129,5 +129,7 @@ namespace ShiftSearch
 
             return false;
         }
+
+        private string PhoneNumbersList() => string.Join(",", _phoneNumbers);
     }
 }
