@@ -37,9 +37,17 @@ namespace ShiftSearch
         public string Symbol { get; init; }
         public ShiftSearchClient ShiftSearchClient { get; init; }
         public string Url { get; init; }
+        public bool DoneNotifyingAllThresholds => PutTrackers.All(tracker => tracker.DoneNotifyingAllThresholds) && 
+                                                  CallTrackers.All(tracker => tracker.DoneNotifyingAllThresholds);
 
         public async Task UpdateAndNotify()
         {
+            if (DoneNotifyingAllThresholds)
+            {
+                Console.WriteLine($"Done notifying all thresholds for symbol {Symbol}");
+                return;
+            }
+
             var success = await ShiftSearchClient.GoToPage(Url);
             if (!success)
             {
@@ -84,6 +92,8 @@ namespace ShiftSearch
         private readonly string _description;
         private readonly List<string> _phoneNumbers;
         private readonly PlivoConfig _plivoConfig;
+
+        public bool DoneNotifyingAllThresholds => _thresholdNotifications.Values.All(v => v);
 
         public void UpdateAndNotify(string amountStr)
         {
