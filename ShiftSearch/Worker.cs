@@ -16,7 +16,7 @@ using ShiftSearch.ViewModels;
 
 namespace ShiftSearch
 {
-    public class Worker : BackgroundService
+    public class Worker : BackgroundService, IAsyncDisposable
     {
         private readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -31,17 +31,18 @@ namespace ShiftSearch
                 authToken: configuration["PlivoAuthToken"],
                 fromNumber: configuration["Plivo:From"]);
 
-            var client = new ShiftSearchClient(configuration["ChromePath"]);
+            _client = new ShiftSearchClient(configuration["ChromePath"]);
 
             _symbolTrackers = configuration.GetSection("Symbols")
                 .Get<List<SymbolConfig>>()
-                .Select(config => new SymbolTracker(config, plivoConfig, client))
+                .Select(config => new SymbolTracker(config, plivoConfig, _client))
                 .ToList();
 
             _hostApplicationLifetime = hostApplicationLifetime;
         }
 
         private int intervalSeconds = 30;
+        private readonly ShiftSearchClient _client;
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
@@ -82,6 +83,20 @@ namespace ShiftSearch
             }
 
             _hostApplicationLifetime.StopApplication();
+        }
+
+        public override async Task StopAsync(CancellationToken token)
+        {
+            await base.StopAsync(token);
+            await DisposeAsync();
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            if (_client != null)
+            {
+                await _client.DisposeAsync();
+            }
         }
     }
 }

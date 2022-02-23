@@ -15,7 +15,7 @@ using ShiftSearch.ViewModels;
 
 namespace ShiftSearch
 {
-    public class ShiftSearchClient
+    public class ShiftSearchClient : IAsyncDisposable
     {
         public ShiftSearchClient(string chromePath)
         {
@@ -182,5 +182,15 @@ namespace ShiftSearch
             return numbers.Max();
         }
 
+        public async ValueTask DisposeAsync()
+        {
+            if (Browser != null)
+            {
+                var page = await GetPage();
+                await page.DisposeAsync();
+
+                await Browser.DisposeAsync();
+            }
+        }
     }
 }
