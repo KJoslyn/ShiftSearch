@@ -29,8 +29,7 @@ namespace ShiftSearch
             var plivoConfig = new PlivoConfig(
                 authId: configuration["PlivoAuthId"],
                 authToken: configuration["PlivoAuthToken"],
-                fromNumber: configuration["Plivo:From"],
-                toNumbers: configuration.GetSection("Plivo:To").Get<List<string>>());
+                fromNumber: configuration["Plivo:From"]);
 
             _symbolTrackers = configuration.GetSection("Symbols")
                 .Get<List<SymbolConfig>>()

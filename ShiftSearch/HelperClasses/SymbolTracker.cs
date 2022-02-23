@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Plivo;
+using Plivo.Resource.Call;
 using Serilog;
 using ShiftSearch.Code;
 using ShiftSearch.Configs;
@@ -16,14 +17,23 @@ namespace ShiftSearch
         public SymbolTracker(SymbolConfig symbolConfig, PlivoConfig plivoConfig, string chromePath)
         {
             Symbol = symbolConfig.Symbol;
-            PutTracker = new ThresholdTracker(symbolConfig.PutThresholds, $"{symbolConfig.Symbol} Puts", plivoConfig);
-            CallTracker = new ThresholdTracker(symbolConfig.CallThresholds, $"{symbolConfig.Symbol} Calls", plivoConfig);
             ShiftSearchClient = new ShiftSearchClient(symbolConfig.Url, chromePath);
+
+            PutTrackers = new List<ThresholdTracker>();
+            CallTrackers = new List<ThresholdTracker>();
+            foreach (var userThresholdConfig in symbolConfig.UserThresholds)
+            {
+                var putTracker = new ThresholdTracker(userThresholdConfig.PhoneNumbers, userThresholdConfig.PutThresholds, $"{symbolConfig.Symbol} Puts", plivoConfig);
+                var callTracker = new ThresholdTracker(userThresholdConfig.PhoneNumbers, userThresholdConfig.CallThresholds, $"{symbolConfig.Symbol} Calls", plivoConfig);
+
+                PutTrackers.Add(putTracker);
+                CallTrackers.Add(callTracker);
+            }
         }
 
+        public List<ThresholdTracker> PutTrackers { get; init; }
+        public List<ThresholdTracker> CallTrackers { get; init; }
         public string Symbol { get; init; }
-        public ThresholdTracker PutTracker { get; init; }
-        public ThresholdTracker CallTracker { get; init; }
         public ShiftSearchClient ShiftSearchClient { get; init; }
 
         public async Task UpdateAndNotify()
@@ -39,17 +49,26 @@ namespace ShiftSearch
             BlockOrdersViewModel vm = await ShiftSearchClient.RecognizeBlockOrders();
 
             //BlockOrdersViewModel vm = new BlockOrdersViewModel(callAmount: "1M", putAmount: "400K");
-            PutTracker.UpdateAndNotify(vm.PutAmount);
-            CallTracker.UpdateAndNotify(vm.CallAmount);
+            foreach (var putTracker in PutTrackers)
+            {
+                putTracker.UpdateAndNotify(vm.PutAmount);
+            }
+
+            foreach (var callTracker in PutTrackers)
+            {
+                callTracker.UpdateAndNotify(vm.PutAmount);
+            }
         }
     }
 
     public class ThresholdTracker
     {
-        public ThresholdTracker(List<double> thresholdValues, 
+        public ThresholdTracker(List<string> phoneNumbers,
+                                List<double> thresholdValues, 
                                 string description, 
                                 PlivoConfig plivoConfig)
         {
+            _phoneNumbers = phoneNumbers;
             _plivoConfig = plivoConfig;
             _plivoClient = new PlivoApi(plivoConfig.AuthId, plivoConfig.AuthToken);
             _description = description;
@@ -61,6 +80,7 @@ namespace ShiftSearch
         private readonly PlivoApi _plivoClient;
         private readonly Dictionary<double, bool> _thresholdNotifications;
         private readonly string _description;
+        private readonly List<string> _phoneNumbers;
         private readonly PlivoConfig _plivoConfig;
 
         public void UpdateAndNotify(string amountStr)
@@ -91,7 +111,7 @@ namespace ShiftSearch
             try
             {
 
-                var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _plivoConfig.ToNumbers,
+                var response = _plivoClient.Message.Create(src: _plivoConfig.FromNumber, dst: _phoneNumbers,
                     text: msg);
 
                 if (response.StatusCode == 202)
