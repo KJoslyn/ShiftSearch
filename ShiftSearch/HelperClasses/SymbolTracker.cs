@@ -14,10 +14,11 @@ namespace ShiftSearch
 {
     public class SymbolTracker
     {
-        public SymbolTracker(SymbolConfig symbolConfig, PlivoConfig plivoConfig, string chromePath)
+        public SymbolTracker(SymbolConfig symbolConfig, PlivoConfig plivoConfig, ShiftSearchClient client)
         {
+            Url = symbolConfig.Url;
             Symbol = symbolConfig.Symbol;
-            ShiftSearchClient = new ShiftSearchClient(symbolConfig.Url, chromePath);
+            ShiftSearchClient = client;
 
             PutTrackers = new List<ThresholdTracker>();
             CallTrackers = new List<ThresholdTracker>();
@@ -35,13 +36,14 @@ namespace ShiftSearch
         public List<ThresholdTracker> CallTrackers { get; init; }
         public string Symbol { get; init; }
         public ShiftSearchClient ShiftSearchClient { get; init; }
+        public string Url { get; init; }
 
         public async Task UpdateAndNotify()
         {
-            var success = await ShiftSearchClient.GoToPage();
+            var success = await ShiftSearchClient.GoToPage(Url);
             if (!success)
             {
-                Log.Warning($"Couldn't navigate to page {ShiftSearchClient.Url} ");
+                Log.Warning($"Couldn't navigate to page {Url} ");
                 // TODO Exponential back off?
                 return;
             }

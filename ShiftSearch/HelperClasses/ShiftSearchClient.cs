@@ -16,13 +16,11 @@ namespace ShiftSearch
 {
     public class ShiftSearchClient
     {
-        public ShiftSearchClient(string url, string chromePath)
+        public ShiftSearchClient(string chromePath)
         {
-            Url = url;
             ChromePath = chromePath;
         }
 
-        public string Url { get; }
         protected string ChromePath { get; }
         protected Browser? Browser { get; private set; }
 
@@ -59,7 +57,7 @@ namespace ShiftSearch
             return await GetElement(page, xPathMatch);
         }
 
-        public async Task<bool> GoToPage()
+        public async Task<bool> GoToPage(string url)
         {
             if (Browser == null)
             {
@@ -67,15 +65,15 @@ namespace ShiftSearch
             }
 
             Page page = await GetPage();
-            if (page.Url == Url)
+            if (page.Url == url)
             {
                 return true;
             }
 
             try
             {
-                await page.GoToAsync(Url);
-                if (page.Url == Url)
+                await page.GoToAsync(url);
+                if (page.Url == url)
                 {
                     return true;
                 }

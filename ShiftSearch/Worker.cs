@@ -31,9 +31,11 @@ namespace ShiftSearch
                 authToken: configuration["PlivoAuthToken"],
                 fromNumber: configuration["Plivo:From"]);
 
+            var client = new ShiftSearchClient(configuration["ChromePath"]);
+
             _symbolTrackers = configuration.GetSection("Symbols")
                 .Get<List<SymbolConfig>>()
-                .Select(config => new SymbolTracker(config, plivoConfig, configuration["ChromePath"]))
+                .Select(config => new SymbolTracker(config, plivoConfig, client))
                 .ToList();
 
             _hostApplicationLifetime = hostApplicationLifetime;
