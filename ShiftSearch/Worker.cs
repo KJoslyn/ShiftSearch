@@ -57,7 +57,7 @@ namespace ShiftSearch
                     Log.Information("Market now closed!");
                     break;
                 }
-                else if (now <= marketOpenTime && !Program.IGNORE_MARKET_HOURS)
+                else if (now <= marketOpenTime.Add(TimeSpan.FromMinutes(15)) && !Program.IGNORE_MARKET_HOURS)
                 {
                     Log.Information("Market not open yet!");
                     // Or, wait until 9:30am
